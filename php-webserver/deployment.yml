@@ -1,0 +1,150 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-webserver
+  labels:
+    app: lingoda-demo
+    role: php-webserver-deploy
+    stage: dev
+    version: 7.0.1
+  annotations:
+    author: "ciprian.bucur"
+spec:
+  selector:
+    matchLabels:
+      app: lingoda-demo
+      role: php-webserver-pod
+      stage: dev
+      version: 7.0.1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lingoda-demo    
+        role: php-webserver-pod
+        stage: dev
+        version: 7.0.1
+      annotations:
+        author: "ciprian.bucur"
+    spec:
+      nodeSelector:
+        role: workers
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 33
+      containers:
+      - name: webserver
+        image: nginx:latest
+        imagePullPolicy: Always
+        env:
+        - name: NGINX_ROOT_PATH
+          value: "/var/www/lingoda/public/"
+        resources:
+          requests:
+            memory: 250Mi
+          limits:
+            memory: 250Mi
+        ports:
+        - name: webserver-http
+          containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - name: public
+          mountPath: "/var/www/lingoda/public"
+          readOnly: true
+        - name: var
+          mountPath: "/var/www/lingoda/var"
+          readOnly: true
+        - name: nginx-config
+          mountPath: "/etc/nginx/templates/lingoda.conf.template"
+          subPath: lingoda.conf.template
+      - name: php-fpm
+        image: lingoda/demo
+        imagePullPolicy: Always
+        env:
+        - name: DB_HOST
+          value: "db-svc"
+        - name: DB_DATABASE
+          value: "lingoda"
+        - name: DB_USERNAME
+          value: "lingoda"
+        - name: DB_PORT
+          value: "3306"
+        - name: APP_ENV
+          value: "prod"
+        - name: APP_DEBUG
+          value: "0"
+        - name: REDIS_HOST
+          value: "redis-svc"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db
+              key: DB_PASSWORD
+        - name: OPCACHE_JIT_BUFFER_SIZE
+          value: "0"
+        resources:
+          requests:
+            memory: 4Gi
+          limits:
+            memory: 5Gi
+        volumeMounts:
+        - name: public
+          mountPath: "/var/www/lingoda/public"
+        - name: var
+          mountPath: "/var/www/lingoda/var"
+        - name: tmp
+          mountPath: "/tmp"
+      initContainers:
+        - name: init-lingoda
+          command: ['/bin/bash', "/var/www/lingoda/bin/init.sh"]
+          image: 322406986013.dkr.ecr.eu-central-1.amazonaws.com/starter:1.0.0
+          imagePullPolicy: Always
+          env:
+          - name: DB_HOST
+            value: "db-svc"
+          - name: DB_DATABASE
+            value: "lingoda"
+          - name: DB_USERNAME
+            value: "lingoda"
+          - name: DB_PORT
+            value: "3306"
+          - name: APP_ENV
+            value: "prod"
+          - name: APP_DEBUG
+            value: "0"
+          - name: REDIS_HOST
+            value: "redis-svc"
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db
+                key: DB_PASSWORD
+          - name: OPCACHE_JIT_BUFFER_SIZE
+            value: "0"
+          resources:
+            requests:
+              memory: 4Gi
+            limits:
+              memory: 5Gi
+          volumeMounts:
+          - name: public
+            mountPath: "/var/www/lingoda/public"
+          - name: tmp
+            mountPath: "/tmp"  
+          - name: var
+            mountPath: "/var/www/lingoda/var"
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+      - name: public
+        emptyDir: {}
+      - name: tmp
+        emptyDir:
+          medium: Memory
+          sizeLimit: "1Gi"
+      - name: var
+        persistentVolumeClaim:
+          claimName: var

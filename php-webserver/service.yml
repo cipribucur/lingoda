@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-webserver-svc
+  annotations:
+    author: "ciprian.bucur"
+  labels:
+    app: lingoda-demo
+    role: php-webserver-svc    
+    stage: dev
+    version: 7.0.1
+spec:
+  selector:
+    app: lingoda-demo    
+    role: php-webserver-pod
+    stage: dev
+    version: 7.0.1
+  ports:
+    - name: php-webserver-http
+      protocol: TCP
+      port: 80
+      targetPort: webserver-http

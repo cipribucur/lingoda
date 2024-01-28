@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+  labels:
+    app: lingoda-demo
+    stage: dev
+    version: 7.0.1
+  annotations:
+    author: "ciprian.bucur"
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress

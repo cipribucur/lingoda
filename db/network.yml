@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-network-policy
+  labels:
+    app: lingoda-demo    
+    stage: dev
+    version: 7.0.1
+  annotations:
+    author: "ciprian.bucur"
+spec:
+  podSelector:
+    matchLabels:
+      role: db-pod
+  policyTypes:
+  - Ingress
+  ingress: 
+  - from:
+    - podSelector:
+        matchExpressions:
+        - key: role
+          operator: In
+          values:
+          - php-webserver-pod
+          - cron-pod
+    ports:
+    - protocol: TCP
+      port: 3306

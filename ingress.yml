@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: loadbalancer
+  labels:
+    app: lingoda-demo    
+    stage: dev
+    version: v10.0.6
+  annotations:
+    author: "ciprian.bucur"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "10"
+    nginx.ingress.kubernetes.io/limit-rps: "20"
+    cert-manager.io/clusterissuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Content-Security-Policy: default-src 'self'; ";
+spec:
+  tls:
+  - hosts:
+    - demo.my.lingoda.com
+    secretName: cert
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: php-webserver-svc
+                port:
+                  name: webserver-http
+      host: demo.my.lingoda.com

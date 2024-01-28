@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-svc
+  annotations:
+    author: "ciprian.bucur"
+  labels:
+    app: lingoda-demo
+    role: db-svc    
+    stage: dev
+    version: 7.0.1
+spec:
+  selector:
+    app: lingoda-demo
+    role: db-pod
+    stage: dev
+    version: 7.0.1
+  ports:
+    - name: db
+      protocol: TCP
+      port: 3306
+      targetPort: db

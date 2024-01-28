@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lingoda
+  labels:
+    app: lingoda-demo    
+    stage: dev
+    version: 7.0.1
+  annotations:
+    author: "ciprian.bucur"

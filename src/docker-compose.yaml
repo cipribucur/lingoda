@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  php-fpm:
+    build:
+      context: ./.docker/php/
+      dockerfile: Dockerfile
+    container_name: lingoda-php-fpm
+    environment:
+      DB_HOST: db
+      DB_DATABASE: lingoda
+      DB_USER: lingoda
+      DB_PASSWORD: lingoda
+    networks:
+      - lingoda
+    volumes:
+      - public:/var/www/lingoda/public/
+      - var:/var/www/lingoda/var
+  
+  webserver:
+    build:
+      context: ./.docker/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - public:/var/www/lingoda/public
+      - ./.docker/nginx/lingoda.conf:/etc/nginx/conf.d/lingoda.conf
+    container_name: lingoda-nginx
+    networks:
+      - lingoda
+    depends_on:
+      - php-fpm
+
+  db:
+    image: mysql:8.0.25
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: lingoda
+      MYSQL_USER: lingoda
+      MYSQL_PASSWORD: lingoda
+    container_name: lingoda-mysql
+    networks:
+       - lingoda
+
+volumes:
+    db:
+    public:
+    var:
+
+networks:
+  lingoda:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

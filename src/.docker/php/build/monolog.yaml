@@ -1,0 +1,10 @@
+monolog:
+    handlers:
+        file_log:
+            type: stream
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: warning
+        docker:
+            type: stream
+            path: "php://stderr"
+            level: error

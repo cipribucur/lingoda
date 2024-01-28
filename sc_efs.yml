@@ -1,0 +1,11 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: lingoda-efs
+  labels:
+    app: lingoda-demo
+    stage: dev
+    version: 7.0.1
+  annotations:
+    author: "ciprian.bucur"
+provisioner: efs.csi.aws.com
