@@ -35,7 +35,7 @@ spec:
         fsGroup: 33
       containers:
       - name: webserver
-        image: nginx:latest
+        image: cipribucur/lingoda-webserver:latest
         imagePullPolicy: Always
         env:
         - name: NGINX_ROOT_PATH
@@ -60,7 +60,7 @@ spec:
           mountPath: "/etc/nginx/templates/lingoda.conf.template"
           subPath: lingoda.conf.template
       - name: php-fpm
-        image: lingoda/demo
+        image: cipribucur/lingoda-php:latest
         imagePullPolicy: Always
         env:
         - name: DB_HOST
@@ -86,9 +86,9 @@ spec:
           value: "0"
         resources:
           requests:
-            memory: 4Gi
+            memory: 300Mi
           limits:
-            memory: 5Gi
+            memory: 300Mi
         volumeMounts:
         - name: public
           mountPath: "/var/www/lingoda/public"
@@ -99,7 +99,7 @@ spec:
       initContainers:
         - name: init-lingoda
           command: ['/bin/bash', "/var/www/lingoda/bin/init.sh"]
-          image: 322406986013.dkr.ecr.eu-central-1.amazonaws.com/starter:1.0.0
+          image: cipribucur/lingoda-php:latest
           imagePullPolicy: Always
           env:
           - name: DB_HOST

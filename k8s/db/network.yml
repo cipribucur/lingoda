@@ -22,7 +22,6 @@ spec:
           operator: In
           values:
           - php-webserver-pod
-          - cron-pod
     ports:
     - protocol: TCP
       port: 3306
