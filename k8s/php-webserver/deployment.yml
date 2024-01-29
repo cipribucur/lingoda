@@ -29,10 +29,6 @@ spec:
     spec:
       nodeSelector:
         role: workers
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 33
       containers:
       - name: webserver
         image: cipribucur/lingoda-webserver:latest
