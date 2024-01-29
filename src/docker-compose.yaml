@@ -22,7 +22,7 @@ services:
       context: ./.docker/nginx
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "127.0.0.1:80:80"
     volumes:
       - public:/var/www/lingoda/public
       - ./.docker/nginx/lingoda.conf:/etc/nginx/conf.d/lingoda.conf

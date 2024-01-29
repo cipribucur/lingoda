@@ -75,8 +75,6 @@ spec:
           value: "prod"
         - name: APP_DEBUG
           value: "0"
-        - name: REDIS_HOST
-          value: "redis-svc"
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -114,8 +112,6 @@ spec:
             value: "prod"
           - name: APP_DEBUG
             value: "0"
-          - name: REDIS_HOST
-            value: "redis-svc"
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
