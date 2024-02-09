@@ -11,7 +11,7 @@ metadata:
 data:
   lingoda.conf.template: |-
     server {
-        listen 8080;
+        listen 80;
         server_name lingoda.local;
         root ${NGINX_ROOT_PATH};
         

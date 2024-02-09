@@ -27,8 +27,8 @@ spec:
       annotations:
         author: "ciprian.bucur"
     spec:
-      nodeSelector:
-        role: workers
+      securityContext:
+        fsGroup: 33
       containers:
       - name: webserver
         image: cipribucur/lingoda-webserver:latest
@@ -46,17 +46,15 @@ spec:
           containerPort: 80
           protocol: TCP
         volumeMounts:
-        - name: public
-          mountPath: "/var/www/lingoda/public"
-          readOnly: true
-        - name: var
-          mountPath: "/var/www/lingoda/var"
-          readOnly: true
         - name: nginx-config
           mountPath: "/etc/nginx/templates/lingoda.conf.template"
           subPath: lingoda.conf.template
+        - name: public
+          mountPath: "/var/www/lingoda/public"
+        - name: var
+          mountPath: "/var/www/lingoda/var"
       - name: php-fpm
-        image: cipribucur/lingoda-php:latest
+        image: cipribucur/lingoda-php:1.0.6
         imagePullPolicy: Always
         env:
         - name: DB_HOST
@@ -72,10 +70,7 @@ spec:
         - name: APP_DEBUG
           value: "0"
         - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db
-              key: DB_PASSWORD
+          value: "lingoda"
         - name: OPCACHE_JIT_BUFFER_SIZE
           value: "0"
         resources:
@@ -88,12 +83,18 @@ spec:
           mountPath: "/var/www/lingoda/public"
         - name: var
           mountPath: "/var/www/lingoda/var"
-        - name: tmp
-          mountPath: "/tmp"
       initContainers:
+        - name: volume-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:33 /var/www/lingoda/public /var/www/lingoda/var"]
+          volumeMounts:
+          - name: public
+            mountPath: "/var/www/lingoda/public"
+          - name: var
+            mountPath: "/var/www/lingoda/var"
         - name: init-lingoda
           command: ['/bin/bash', "/var/www/lingoda/bin/init.sh"]
-          image: cipribucur/lingoda-php:latest
+          image: cipribucur/lingoda-php:1.0.6
           imagePullPolicy: Always
           env:
           - name: DB_HOST
@@ -109,22 +110,17 @@ spec:
           - name: APP_DEBUG
             value: "0"
           - name: DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: db
-                key: DB_PASSWORD
+            value: "lingoda"
           - name: OPCACHE_JIT_BUFFER_SIZE
             value: "0"
           resources:
             requests:
-              memory: 4Gi
+              memory: 300Mi
             limits:
-              memory: 5Gi
+              memory: 300Mi
           volumeMounts:
           - name: public
             mountPath: "/var/www/lingoda/public"
-          - name: tmp
-            mountPath: "/tmp"  
           - name: var
             mountPath: "/var/www/lingoda/var"
       volumes:
@@ -133,10 +129,5 @@ spec:
           name: nginx-config
       - name: public
         emptyDir: {}
-      - name: tmp
-        emptyDir:
-          medium: Memory
-          sizeLimit: "1Gi"
       - name: var
-        persistentVolumeClaim:
-          claimName: var
+        emptyDir: {}
