@@ -27,8 +27,6 @@ spec:
       annotations:
         author: "ciprian.bucur"
     spec:
-      nodeSelector:
-        role: workers
       containers:
       - name: db
         image: mysql:8.0.25
@@ -53,9 +51,9 @@ spec:
           protocol: TCP
         resources:
           requests:
-            memory: 1600Mi
+            memory: 100Mi
           limits:
-            memory: 2Gi       
+            memory: 1Gi       
         volumeMounts:
         - name: db
           mountPath: "/var/lib/mysql"
@@ -67,5 +65,4 @@ spec:
         configMap:
           name: mysql-config
       - name: db
-        persistentVolumeClaim:
-          claimName: db
+        emptyDir: {}

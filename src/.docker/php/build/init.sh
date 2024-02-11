@@ -3,24 +3,26 @@ echo "Is there a doctor in the house?"
 
 cd /var/www/lingoda/
 
-INDEX_PHP=/var/www/lingoda/public/index.php
+PUBLIC_FOLDER_COUNT=$(find /var/www/lingoda/public -mindepth 1 -maxdepth 1 | wc -l)
 
-if [ ! -f "$INDEX_PHP" ]
+if [ "$PUBLIC_FOLDER_COUNT" -eq 0 ]
 then
     echo "copy index.php from volumes"
-    cp -R /var/www/lingoda/volumes/public/index.php /var/www/lingoda/public/index.php
+    cp -R /var/www/lingoda/volumes/public/ /var/www/lingoda/
 fi
 
-VAR_FOLDER=/var/www/lingoda/var/
+VAR_FOLDER_COUNT=$(find /var/www/lingoda/var -mindepth 1 -maxdepth 1 | wc -l)
 
-if [ ! -d "$VAR_FOLDER" ]
+if [ "$VAR_FOLDER_COUNT" -eq 0 ]
 then
     echo "copy var/ from volumes "
     cp -R /var/www/lingoda/volumes/var/ /var/www/lingoda/
 fi    
 
-SQL_INSTALLED=$(printf 'SELECT data FROM settings_store where id="sql_install" and scope="lingoda"')
-IS_INSTALLED=$(mysql -h $DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -e "$SQL_INSTALLED" $DB_DATABASE --skip-column-names)
+IS_INSTALLED=1
+
+#SQL_INSTALLED=$(printf 'SELECT data FROM settings_store where id="sql_install" and scope="lingoda"')
+#IS_INSTALLED=$(mysql -h $DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -e "$SQL_INSTALLED" $DB_DATABASE --skip-column-names)
 
 if [[ ! $IS_INSTALLED == '1' ]]
 then
@@ -39,7 +41,7 @@ then
     fi
 
     echo "hard delete the cache folder"
-    rm -rf var-cache/prod/
+    rm -rf var/cache/prod/
 
     echo "cache:clear"
     php bin/console cache:clear
@@ -47,29 +49,32 @@ then
 else
 
     # in case the db is down
-    DB_UP=$(printf 'SELECT count(1) as nr FROM users')
-    for i in 1 2 3
-    do
-        mysql -h$DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -e "$DB_UP" $DB_DATABASE --skip-column-names
-        IS_DB_UP=$?
+    #DB_UP=$(printf 'SELECT count(1) as nr FROM users')
+    #for i in 1 2 3
+    #do
+    #    mysql -h$DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -e "$DB_UP" $DB_DATABASE --skip-column-names
+    #    IS_DB_UP=$?
+#
+    #    if [ $IS_DB_UP -eq 0 ]
+    #    then
+    #        break
+    #    else
+    #        sleep 15
+    #    fi
+    #    echo "no db was found";
+    #    exit 2
+    #done
 
-        if [ $IS_DB_UP -eq 0 ]
-        then
-            break
-        else
-            sleep 15
-        fi
-        echo "no db was found";
-        exit 2
-    done
+    #echo "maintenance-mode --enable"
+    #rm -f var/config/maintenance.php
+    #echo '<?php return ["sessionId" => "command-line-dummy-session-id"];' >> var/config/maintenance.php
+    #sleep 5
 
-    echo "maintenance-mode --enable"
-    rm -f var/config/maintenance.php
-    echo '<?php return ["sessionId" => "command-line-dummy-session-id"];' >> var/config/maintenance.php
-    sleep 5
+    #echo "hard delete the cache folder"
+    #rm -rf var/cache/prod/
 
-    echo "hard delete the cache folder"
-    rm -rf var-cache/prod/
+    echo "assets deploy"
+    php bin/console asset-map:compile --no-interaction 
 
     echo "cache:clear"
     php bin/console cache:clear --no-interaction 
@@ -77,8 +82,8 @@ else
     echo "doctrine:migrations:migrate"
     php bin/console doctrine:migrations:migrate --no-interaction 
 
-    echo "maintenance-mode --disable"
-    php bin/console maintenance-mode --disable -
+    #echo "maintenance-mode --disable"
+    #php bin/console maintenance-mode --disable -
 fi
 
 echo "That's all folkes!!"

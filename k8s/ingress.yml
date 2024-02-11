@@ -5,24 +5,19 @@ metadata:
   labels:
     app: lingoda-demo    
     stage: dev
-    version: v10.0.6
+    version: 7.0.1
   annotations:
     author: "ciprian.bucur"
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: "10"
-    nginx.ingress.kubernetes.io/limit-rps: "20"
-    cert-manager.io/clusterissuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "Content-Security-Policy: default-src 'self'; ";
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
+  ingressClassName: nginx
   tls:
   - hosts:
-    - demo.my.lingoda.com
+    - lingoda.inocentium.work
     secretName: cert
   rules:
-    - http:
+    - host: lingoda.inocentium.work
+      http:
         paths:
           - path: /
             pathType: Prefix
@@ -31,4 +26,4 @@ spec:
                 name: php-webserver-svc
                 port:
                   name: webserver-http
-      host: demo.my.lingoda.com
+      

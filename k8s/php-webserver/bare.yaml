@@ -54,7 +54,7 @@ spec:
         - name: var
           mountPath: "/var/www/lingoda/var"
       - name: php-fpm
-        image: cipribucur/lingoda-php:1.0.6
+        image: cipribucur/lingoda-php:1.0.8
         imagePullPolicy: Always
         env:
         - name: DB_HOST
@@ -94,7 +94,7 @@ spec:
             mountPath: "/var/www/lingoda/var"
         - name: init-lingoda
           command: ['/bin/bash', "/var/www/lingoda/bin/init.sh"]
-          image: cipribucur/lingoda-php:1.0.6
+          image: cipribucur/lingoda-php:1.0.8
           imagePullPolicy: Always
           env:
           - name: DB_HOST

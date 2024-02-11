@@ -8,4 +8,5 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-  - demo.my.lingoda.cloud
+  - "*.inocentium.work"
+  commonName: "*.inocentium.work"

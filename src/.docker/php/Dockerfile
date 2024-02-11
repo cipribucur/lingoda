@@ -31,7 +31,8 @@ RUN set -eux && \
         vim-tiny \
         unzip \
         autoconf && \
-    docker-php-ext-install pdo pdo_mysql mysqli && \
+    docker-php-ext-install \ 
+        pdo pdo_mysql mysqli && \
     # bashrc
     echo "\
     export PS1=\"\${usercolor}\\\u\\\[\\\033[0;33m\\\]@\${hostcolor}\${DOCKER_NAME} \\\[\\\033[0;36m\\\]\\\w \$ \\\[\\\033[00m\\\] \"\n\
@@ -107,13 +108,18 @@ RUN composer create-project symfony/symfony-demo /var/www/lingoda
 RUN composer require webapp
 RUN composer install
 
-RUN mkdir -p /var/www/volumes/
-RUN mkdir -p /var/www/volumes/public/
-RUN mkdir -p /var/www/volumes/var/
+RUN mkdir -p /var/www/lingoda/volumes/
+RUN mkdir -p /var/www/lingoda/volumes/public/
+RUN mkdir -p /var/www/lingoda/volumes/var/
 
 RUN cp -r /var/www/lingoda/public/ /var/www/lingoda/volumes/
 RUN cp -r /var/www/lingoda/var/ /var/www/lingoda/volumes/
 
-COPY ./build/init.sh /var/www/lingoda/bin/
-COPY ./build/database.yaml /var/www/lingoda/config/local/
+USER root
 
+COPY ./build/init.sh /var/www/lingoda/bin/
+RUN chown -R lingoda:www-data /var/www/lingoda/bin/init.sh
+COPY ./build/doctrine.yaml /var/www/lingoda/config/packages/doctrine.yaml
+RUN chown -R lingoda:www-data /var/www/lingoda/config/packages/doctrine.yaml
+
+USER lingoda
