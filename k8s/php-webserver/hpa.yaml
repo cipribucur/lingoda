@@ -1,4 +1,4 @@
-apiVersion: autoscaling/v1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: lingoda-demo
@@ -7,7 +7,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: php-webserver
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 3
   metrics:
   - type: Resource
@@ -15,4 +15,4 @@ spec:
       name: memory
       target:
         type: Utilization
-        averageValue: 250Mi
+        averageValue: 10Mi
